@@ -9,8 +9,14 @@ import {
   createUserWithEmailAndPassword,
   FacebookAuthProvider,
   User,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  NextOrObserver,
 } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+
+
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDFxxiiFbwFuHbrpIyB8mmLyiKqFFcvPT8",
@@ -69,4 +75,38 @@ export const createAuthUserWithEmailAndPassword = async (
 ) => {
   if (!email || !password) return;
   return await createUserWithEmailAndPassword(auth, email, password);
+};
+
+export const signInAuthUserWithEmailAndPassword = async (
+  email: string,
+  password: string
+) => {
+  if (!email || !password) return;
+  return await signInWithEmailAndPassword(auth, email, password);
+};
+export const signOutAuthUser = async () => {
+  return await signOut(auth);
+};
+
+export const onAuthStateChangedListener = (callback: NextOrObserver<User>) =>
+  onAuthStateChanged(auth, callback);
+
+// add product details into filestore
+export const AddProductDetails = async (currentUser: any,additionalInformation: any = null) => {
+  const productDocRef = doc(db, "Categories");
+  const productSnapShot = await getDoc(productDocRef);
+  if (!productSnapShot.exists()) {
+    const createdAt = new Date();
+    const createdBy= currentUser;
+    try {
+      await setDoc(productDocRef, {
+        createdAt,
+        createdBy,
+        ...additionalInformation,
+      });
+    } catch (error: any) {
+      console.log("error in user creating", error.message);
+    }
+  }
+  // return userDocRef;
 };

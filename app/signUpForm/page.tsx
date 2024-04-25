@@ -2,9 +2,11 @@
 
 import React, { useState } from "react";
 import { User } from "firebase/auth";
+import Link from "next/link";
 import {
   createAuthUserWithEmailAndPassword,
   createUserDocumentFromAuth,
+  signInWithGooglePopUp,
 } from "./../../utils/firebase";
 import FormInput from "@/components/formInput";
 import Button from "@/components/button";
@@ -54,7 +56,12 @@ const SignUpForm = () => {
   };
   return (
     <div className="flex min-h-screen flex-col items-center justify-between p-24">
-      <h1>hi sign up with email and password</h1>
+      <h1>do not have an account sign up with email and password</h1>
+      <div>
+        <Link href={"/"}>
+          <span>back</span>
+        </Link>
+      </div>
       <form onSubmit={handleFormOnSubmit}>
         <FormInput
           type="text"
@@ -91,8 +98,10 @@ const SignUpForm = () => {
           required
           onChange={handleFormChange}
           value={confirmPassword}
-        />   
-        <Button type={"submit"} buttonClass={"p-2"}>sign up</Button> 
+        />
+        <Button type={"submit"} buttonClass={"p-2"}>
+          sign up
+        </Button>
       </form>
     </div>
   );
