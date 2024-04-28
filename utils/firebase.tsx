@@ -15,7 +15,7 @@ import {
   NextOrObserver,
 } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
-
+import { v4 } from "uuid";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -92,17 +92,24 @@ export const onAuthStateChangedListener = (callback: NextOrObserver<User>) =>
   onAuthStateChanged(auth, callback);
 
 // add product details into filestore
-export const AddProductDetails = async (currentUser: any,additionalInformation: any = null) => {
-  const productDocRef = doc(db, "Categories");
+export const AddProductDetails = async (
+  currentUser: any,
+  additionalInformation: any = null,
+  imageUrl: string | undefined
+) => {
+  const productDocRef = doc(db, `Products/${v4()}`);
+  console.log(productDocRef);
   const productSnapShot = await getDoc(productDocRef);
   if (!productSnapShot.exists()) {
     const createdAt = new Date();
-    const createdBy= currentUser;
+    // const createdBy = currentUser;
+    console.log("entered here");
     try {
       await setDoc(productDocRef, {
         createdAt,
-        createdBy,
+        // createdBy,
         ...additionalInformation,
+        imageUrl,
       });
     } catch (error: any) {
       console.log("error in user creating", error.message);
@@ -110,3 +117,5 @@ export const AddProductDetails = async (currentUser: any,additionalInformation: 
   }
   // return userDocRef;
 };
+
+//image upload

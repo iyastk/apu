@@ -3,22 +3,46 @@
 import { useState } from "react";
 import { AddProductDetails } from "../../utils/firebase";
 import FormInput from "@/components/formInput";
+import SelectComponent from "@/components/selection";
 
 //special tbd
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { UserContext } from "../../store/UserStore";
+import { v4 } from "uuid";
 
 //fire base storage for photo upload
-import { ref, uploadBytes, getDownloadURL, getStorage } from "firebase/storage";
-const storage=getStorage()
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  getStorage,
+  listAll,
+  list,
+} from "firebase/storage";
+const storage = getStorage();
+
+const categories = [
+  "Clothing",
+  "Accessories",
+  "Cycles",
+  "Sports",
+  "Room Decor",
+  "Stationary",
+  "Bags",
+  "Utensils",
+  "Footwear",
+  "Books",
+  "Electronic stuffs",
+];
+const services = ["Donate", "Rent", "Sell"];
 
 const defaultProduct = {
-  category: "",
-  subCategory: "",
+  category: categories[0],
   title: "",
   details: "",
   price: "",
   contactNumber: "",
+  service: services[0],
   // Add other basic input fields here
 };
 
@@ -26,20 +50,19 @@ const AddProductForm = () => {
   const { currentUser }: { currentUser: any } = useContext(UserContext);
 
   const [formData, setFormData] = useState(defaultProduct);
-  const { category, subCategory, title, details, price, contactNumber } =
-    formData;
+  const { category, title, details, price, contactNumber, service } = formData;
 
   // for image later review
-  const [imageUpload, setImageUpload] = useState(null);
-
-  const imagesRef = ref(storage, "images/");
+  const [imageUpload, setImageUpload] = useState<any>();
+  const [imageUrl, setImageUrl] = useState<string | undefined>();
 
   const uploadFile = () => {
     if (imageUpload == null) return;
-    const imageRef = ref(storage, `images/${title}`);
+    const imageRef = ref(storage, `images/${title}+${v4()}`);
     uploadBytes(imageRef, imageUpload).then((snapshot) => {
       getDownloadURL(snapshot.ref).then((url) => {
-        // setImageUrls((prev) => [...prev, url]);
+        console.log(url);
+        setImageUrl(url);
       });
     });
   };
@@ -48,12 +71,14 @@ const AddProductForm = () => {
     const file = event.target.files?.[0];
     // Proceed with your file handling logic here
     if (file) {
+      setImageUpload(file);
       console.log("Selected file:", file);
     }
   };
 
   const handleChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
+    console.log(name, value);
     setFormData({
       ...formData,
       [name]: value,
@@ -64,13 +89,15 @@ const AddProductForm = () => {
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
+    console.log("logged her");
     e.preventDefault();
     try {
-      const response = await AddProductDetails(currentUser, formData);
-      resetFormField();
+      const response = await AddProductDetails("Products", formData, imageUrl);
       console.log(response);
+      resetFormField();
       console.log("product added successfully");
     } catch (error: any) {
+      //check all this error codes : copy pasted
       if (error.code === "auth/email-already-in-use)") {
         alert("Email already exist");
       } else if (error.code === "auth/weak-password") {
@@ -85,28 +112,24 @@ const AddProductForm = () => {
       className="max-w-lg mx-auto flex min-h-screen flex-col justify-center  items-center gap-3"
       onSubmit={handleSubmit}
     >
-      <FormInput
-        label={"Category"}
-        type="text"
-        name="category"
+      <SelectComponent
         id="category"
+        name="category"
+        categories={categories}
+        className="border rounded p-2"
         onChange={handleChange}
         value={category}
-      ></FormInput>
-      <FormInput
-        label={"sub Category"}
-        type="text"
-        name="subCategory"
-        id="subCategory"
-        onChange={handleChange}
-        value={subCategory}
-      ></FormInput>
+        label="category"
+      ></SelectComponent>
+
       <FormInput
         label={"Title"}
         type="text"
         name="title"
         id="title"
+        className="block w-full mt-1 border-gray-300 rounded-md focus:border-indigo-500 focus:ring focus:ring-indigo-200"
         onChange={handleChange}
+        required
         value={title}
       ></FormInput>
       <FormInput
@@ -114,6 +137,8 @@ const AddProductForm = () => {
         type="textarea"
         name="details"
         id="details"
+        required
+        className="block w-full mt-1 border-gray-300 rounded-md focus:border-indigo-500 focus:ring focus:ring-indigo-200"
         onChange={handleChange}
         value={details}
       ></FormInput>
@@ -122,17 +147,31 @@ const AddProductForm = () => {
         type="text"
         name="price"
         id="price"
+        className="block w-full mt-1 border-gray-300 rounded-md focus:border-indigo-500 focus:ring focus:ring-indigo-200"
         onChange={handleChange}
-        value={price}
+        value={price || 0}
       ></FormInput>
       <FormInput
         label={"contactNumber"}
         type="text"
         name="contactNumber"
         id="contactNumber"
+        required
+        className="block w-full mt-1 border-gray-300 rounded-md focus:border-indigo-500 focus:ring focus:ring-indigo-200"
         onChange={handleChange}
         value={contactNumber}
       ></FormInput>
+
+      <SelectComponent
+        id="service"
+        name="service"
+        categories={services}
+        className="border rounded p-2"
+        onChange={handleChange}
+        value={service}
+        label="service"
+      ></SelectComponent>
+
       {/* Repeat similar code for other input fields */}
       <input type="file" onChange={handleFileChange} />
       <button onClick={uploadFile}> Upload Image</button>
