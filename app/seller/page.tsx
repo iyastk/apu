@@ -11,14 +11,8 @@ import { UserContext } from "../../store/UserStore";
 import { v4 } from "uuid";
 
 //fire base storage for photo upload
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  getStorage,
-  listAll,
-  list,
-} from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL, getStorage } from "firebase/storage";
+import Link from "next/link";
 const storage = getStorage();
 
 const categories = [
@@ -61,8 +55,8 @@ const AddProductForm = () => {
     const imageRef = ref(storage, `images/${title}+${v4()}`);
     uploadBytes(imageRef, imageUpload).then((snapshot) => {
       getDownloadURL(snapshot.ref).then((url) => {
-        console.log(url);
         setImageUrl(url);
+        alert("image uploaded successfully");
       });
     });
   };
@@ -93,9 +87,8 @@ const AddProductForm = () => {
     e.preventDefault();
     try {
       const response = await AddProductDetails("Products", formData, imageUrl);
-      console.log(response);
       resetFormField();
-      console.log("product added successfully");
+      alert("product added successfully");
     } catch (error: any) {
       //check all this error codes : copy pasted
       if (error.code === "auth/email-already-in-use)") {
@@ -108,81 +101,84 @@ const AddProductForm = () => {
   };
 
   return (
-    <form
-      className="max-w-lg mx-auto flex min-h-screen flex-col justify-center  items-center gap-3"
-      onSubmit={handleSubmit}
-    >
-      <SelectComponent
-        id="category"
-        name="category"
-        categories={categories}
-        className="border rounded p-2"
-        onChange={handleChange}
-        value={category}
-        label="category"
-      ></SelectComponent>
+    <div>
+      <Link href={"/"}>
+        <div>go back</div>
+      </Link>
+      <form className="max-w-lg mx-auto flex min-h-screen flex-col justify-center  items-center gap-3">
+        <SelectComponent
+          id="category"
+          name="category"
+          categories={categories}
+          className="border rounded p-2"
+          onChange={handleChange}
+          value={category}
+          label="category"
+        ></SelectComponent>
 
-      <FormInput
-        label={"Title"}
-        type="text"
-        name="title"
-        id="title"
-        className="block w-full mt-1 border-gray-300 rounded-md focus:border-indigo-500 focus:ring focus:ring-indigo-200"
-        onChange={handleChange}
-        required
-        value={title}
-      ></FormInput>
-      <FormInput
-        label={"details"}
-        type="textarea"
-        name="details"
-        id="details"
-        required
-        className="block w-full mt-1 border-gray-300 rounded-md focus:border-indigo-500 focus:ring focus:ring-indigo-200"
-        onChange={handleChange}
-        value={details}
-      ></FormInput>
-      <FormInput
-        label={"price"}
-        type="text"
-        name="price"
-        id="price"
-        className="block w-full mt-1 border-gray-300 rounded-md focus:border-indigo-500 focus:ring focus:ring-indigo-200"
-        onChange={handleChange}
-        value={price || 0}
-      ></FormInput>
-      <FormInput
-        label={"contactNumber"}
-        type="text"
-        name="contactNumber"
-        id="contactNumber"
-        required
-        className="block w-full mt-1 border-gray-300 rounded-md focus:border-indigo-500 focus:ring focus:ring-indigo-200"
-        onChange={handleChange}
-        value={contactNumber}
-      ></FormInput>
+        <FormInput
+          label={"Title"}
+          type="text"
+          name="title"
+          id="title"
+          className="block w-full mt-1 border-gray-300 rounded-md focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+          onChange={handleChange}
+          required
+          value={title}
+        ></FormInput>
+        <FormInput
+          label={"details"}
+          type="textarea"
+          name="details"
+          id="details"
+          required
+          className="block w-full mt-1 border-gray-300 rounded-md focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+          onChange={handleChange}
+          value={details}
+        ></FormInput>
+        <FormInput
+          label={"price"}
+          type="text"
+          name="price"
+          id="price"
+          className="block w-full mt-1 border-gray-300 rounded-md focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+          onChange={handleChange}
+          value={price || 0}
+        ></FormInput>
+        <FormInput
+          label={"contactNumber"}
+          type="text"
+          name="contactNumber"
+          id="contactNumber"
+          required
+          className="block w-full mt-1 border-gray-300 rounded-md focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+          onChange={handleChange}
+          value={contactNumber}
+        ></FormInput>
 
-      <SelectComponent
-        id="service"
-        name="service"
-        categories={services}
-        className="border rounded p-2"
-        onChange={handleChange}
-        value={service}
-        label="service"
-      ></SelectComponent>
+        <SelectComponent
+          id="service"
+          name="service"
+          categories={services}
+          className="border rounded p-2"
+          onChange={handleChange}
+          value={service}
+          label="service"
+        ></SelectComponent>
 
-      {/* Repeat similar code for other input fields */}
-      <input type="file" onChange={handleFileChange} />
-      <button onClick={uploadFile}> Upload Image</button>
+        {/* Repeat similar code for other input fields */}
+        <input type="file" onChange={handleFileChange} />
+        <div onClick={uploadFile}> Upload Image</div>
 
-      <button
-        type="submit"
-        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-      >
-        Add Product
-      </button>
-    </form>
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+          onClick={handleSubmit}
+        >
+          Add Product
+        </button>
+      </form>
+    </div>
   );
 };
 
